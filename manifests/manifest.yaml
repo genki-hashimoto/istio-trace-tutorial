@@ -1,0 +1,155 @@
+### Aアプリ
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-a
+  labels:
+    app: sample-a
+    service: sample-a
+spec:
+  ports:
+  - port: 8000
+    name: http
+  selector:
+    app: sample-a
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sample-a
+  labels:
+    account: sample-a
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-a
+  labels:
+    app: sample-a
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sample-a
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: sample-a
+        version: v1
+    spec:
+      serviceAccountName: sample-a
+      containers:
+      - name: sample-a
+        image: #
+        env:
+        - name: DJANGO_READ_ENV
+          value: "False"
+        - name: REQUEST_URL
+          value: "http://sample-b:8000"
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        securityContext:
+          runAsUser: 1000
+      volumes:
+      - name: tmp
+        emptyDir: {}
+
+---
+
+### Bアプリ
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-b
+  labels:
+    app: sample-b
+    service: sample-b
+spec:
+  ports:
+  - port: 8000
+    name: http
+  selector:
+    app: sample-b
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sample-b
+  labels:
+    account: sample-b
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-b
+  labels:
+    app: sample-b
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sample-b
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: sample-b
+        version: v1
+    spec:
+      serviceAccountName: sample-b
+      containers:
+      - name: sample-b
+        image: #
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        securityContext:
+          runAsUser: 1000
+      volumes:
+      - name: tmp
+        emptyDir: {}
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: sample-gateway
+spec:
+  selector:
+    istio: ingress # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: sample
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - sample-gateway
+  http:
+  - match:
+    - uri:
+        exact: /
+    - uri:
+        exact: /trace/
+    route:
+    - destination:
+        host: sample-a
+        port:
+          number: 8000

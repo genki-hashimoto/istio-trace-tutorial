@@ -1,0 +1,37 @@
+#.Values.pilot for discovery and mesh wide config
+
+
+# Discovery Settings
+pilot:
+  traceSampling: 100.0
+
+global:
+  proxy:
+    tracer: "zipkin"
+    logLevel: info
+
+
+  tracer:
+    zipkin:
+      # Host:Port for reporting trace data in zipkin format. If not specified, will default to zipkin service (port 9411) in the same namespace as the other istio components.
+      address: "jaeger-collector.observability:9411"
+
+#sidecarInjectorWebhook:
+#  templates:
+#     gcp-secrets: |
+#       spec:
+#         containers:
+#         - name: istio-proxy
+#           volumeMounts:
+#           - name: gcp-secret
+#             mountPath: /etc/gcp
+#             readOnly: true
+#           env:
+#           - name: GOOGLE_APPLICATION_CREDENTIALS
+#             value: "/etc/gcp/token"
+#         volumes:
+#         - name: gcp-secret
+#           secret:
+#             secretName: gcp-secret
+
+  #defaultTemplates: [ "sidecar", "gcp-secrets"]

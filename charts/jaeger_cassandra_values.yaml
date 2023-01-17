@@ -1,0 +1,23 @@
+provisionDataStore:
+  cassandra: true
+  elasticsearch: false
+  kafka: false
+
+agent:
+  enabled: false
+
+collector:
+  service:
+    zipkin:
+      port: 9411
+
+cassandra:
+  persistence:
+    enabled: true
+
+schema:
+  extraEnv:
+  - name: "MODE"
+    value: "prod"
+  - name: "TRACE_TTL"
+    value: "600"
