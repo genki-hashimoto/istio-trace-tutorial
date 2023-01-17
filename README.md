@@ -48,7 +48,7 @@ kubectl -n istio-system port-forward svc/istio-ingressgateway 32494:80
 
 ### jaeger UIへアクセス
 ```shell
-export POD_NAME=$(kubectl get pods --namespace obserbability -l "app.kubernetes.io/instance=jaeger,app.kubernetes.io/component=query"
+export POD_NAME=$(kubectl get pods --namespace obserbability -l "app.kubernetes.io/instance=jaeger,app.kubernetes.io/component=query")
 kubectl -n istio-system port-forward --namespace obserbability $POD_NAME 8080:16686
 ```
 
